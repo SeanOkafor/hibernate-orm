@@ -17,16 +17,15 @@ public class NamedDelayedBeanImpl <B> implements ContainedBeanImplementor<B> {
 	private final boolean initializeDelegatedEagerly;
 	private ContainedBeanImplementor<B> delegateBean;
 
-	public NamedDelayedBeanImpl(String beanName, Class<B> beanType, BeanLifecycleStrategy
-								   lifecycleStrategy, BeanContainer beanContainer,
-	                       BeanInstanceProducer fallbackProducer, Boolean initializeDelegatedEagerly) {
+	public NamedDelayedBeanImpl(String beanName, Class<B> beanType, BeanLifecycleStrategy lifecycleStrategy,
+			BeanInstanceProducer fallbackProducer, BeanContainer beanContainer,
+			boolean initializeDelegatedEagerly) {
 		this.beanName = beanName;
 		this.beanType = beanType;
 		this.lifecycleStrategy = lifecycleStrategy;
-		this.beanContainer = beanContainer;
 		this.fallbackProducer = fallbackProducer;
+		this.beanContainer = beanContainer;
 		this.initializeDelegatedEagerly = initializeDelegatedEagerly;
-
 	}
 
 	@Override
