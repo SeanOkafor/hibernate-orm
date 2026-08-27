@@ -8,7 +8,8 @@ import org.hibernate.resource.beans.spi.BeanInstanceProducer;
 /**
  * @author Sean Okafor
  */
-public class DelayedBeanImpl<B> implements ContainedBeanImplementor<B> {
+public class NamedDelayedBeanImpl <B> implements ContainedBeanImplementor<B> {
+	private final String beanName;
 	private final Class<B> beanType;
 	private final BeanLifecycleStrategy lifecycleStrategy;
 	private final BeanInstanceProducer fallbackProducer;
@@ -16,9 +17,10 @@ public class DelayedBeanImpl<B> implements ContainedBeanImplementor<B> {
 	private final boolean initializeDelegatedEagerly;
 	private ContainedBeanImplementor<B> delegateBean;
 
-	public DelayedBeanImpl(Class<B> beanType, BeanLifecycleStrategy
-			lifecycleStrategy, BeanContainer beanContainer,
-						   BeanInstanceProducer fallbackProducer, Boolean initializeDelegatedEagerly) {
+	public NamedDelayedBeanImpl(String beanName, Class<B> beanType, BeanLifecycleStrategy
+								   lifecycleStrategy, BeanContainer beanContainer,
+	                       BeanInstanceProducer fallbackProducer, Boolean initializeDelegatedEagerly) {
+		this.beanName = beanName;
 		this.beanType = beanType;
 		this.lifecycleStrategy = lifecycleStrategy;
 		this.beanContainer = beanContainer;
@@ -35,7 +37,7 @@ public class DelayedBeanImpl<B> implements ContainedBeanImplementor<B> {
 	@Override
 	public void initialize(){
 		if (delegateBean == null) {
-			delegateBean = lifecycleStrategy.createBean( beanType, fallbackProducer, beanContainer);
+			delegateBean = lifecycleStrategy.createBean(beanName, beanType, fallbackProducer, beanContainer);
 		}
 		if (initializeDelegatedEagerly) {
 			delegateBean.initialize();
