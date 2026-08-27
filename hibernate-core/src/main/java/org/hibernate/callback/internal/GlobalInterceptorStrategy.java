@@ -9,6 +9,8 @@ import org.hibernate.callback.spi.InterceptorStrategy;
 import org.hibernate.engine.spi.SessionFactoryImplementor;
 import org.hibernate.resource.beans.container.internal.CdiBeanContainerDelayedAccessImpl;
 import org.hibernate.resource.beans.container.internal.CdiBeanContainerExtendedAccessImpl;
+import org.hibernate.resource.beans.container.internal.DelayedBeanImpl;
+import org.hibernate.resource.beans.container.internal.JpaCompliantLifecycleStrategy;
 import org.hibernate.resource.beans.container.spi.FallbackContainedBean;
 import org.hibernate.resource.beans.internal.FallbackBeanInstanceProducer;
 import org.hibernate.resource.beans.spi.ManagedBean;
@@ -23,7 +25,7 @@ public class GlobalInterceptorStrategy implements InterceptorStrategy {
 
 	//Factory needed to access the service registry
 	public GlobalInterceptorStrategy(Class<? extends Interceptor> interceptorClass,
-									 SessionFactoryImplementor sessionFactory) {
+									SessionFactoryImplementor sessionFactory) {
 		final var mbr = sessionFactory.getServiceRegistry().getService( ManagedBeanRegistry.class );
 		final var bc = mbr.getBeanContainer();
 
@@ -32,11 +34,16 @@ public class GlobalInterceptorStrategy implements InterceptorStrategy {
 					FallbackBeanInstanceProducer.INSTANCE  );
 		}
 		else if (bc instanceof CdiBeanContainerExtendedAccessImpl ||
-				 bc instanceof CdiBeanContainerDelayedAccessImpl ) {
+				bc instanceof CdiBeanContainerDelayedAccessImpl ) {
 			interceptorBean = mbr.getBean(interceptorClass);
 		}
 		else {
-			interceptorBean = mbr.getBean( interceptorClass );
+			interceptorBean = new DelayedBeanImpl<>( interceptorClass,
+					JpaCompliantLifecycleStrategy.INSTANCE,
+					FallbackBeanInstanceProducer.INSTANCE,
+					bc,
+					false);
+
 		}
 	}
 
