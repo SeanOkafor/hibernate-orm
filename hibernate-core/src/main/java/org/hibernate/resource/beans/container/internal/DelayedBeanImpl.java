@@ -1,0 +1,62 @@
+package org.hibernate.resource.beans.container.internal;
+
+import org.hibernate.resource.beans.container.spi.BeanContainer;
+import org.hibernate.resource.beans.container.spi.BeanLifecycleStrategy;
+import org.hibernate.resource.beans.container.spi.ContainedBeanImplementor;
+import org.hibernate.resource.beans.spi.BeanInstanceProducer;
+
+/**
+ * @author Sean Okafor
+ */
+public class DelayedBeanImpl<B> implements ContainedBeanImplementor<B> {
+	private final Class<B> beanType;
+	private final BeanLifecycleStrategy lifecycleStrategy;
+	private final BeanInstanceProducer fallbackProducer;
+	private final BeanContainer beanContainer;
+	private boolean initializeDelegatedEagerly;
+	private ContainedBeanImplementor<B> delegateBean;
+
+	public DelayedBeanImpl(Class<B> beanType, BeanLifecycleStrategy
+			lifecycleStrategy, BeanContainer beanContainer,
+						   BeanInstanceProducer fallbackProducer, Boolean initializeDelegatedEagerly) {
+		this.beanType = beanType;
+		this.lifecycleStrategy = lifecycleStrategy;
+		this.beanContainer = beanContainer;
+		this.fallbackProducer = fallbackProducer;
+		this.initializeDelegatedEagerly = initializeDelegatedEagerly;
+
+	}
+
+	@Override
+	public Class<B> getBeanClass() {
+		return beanType;
+	}
+
+	@Override
+	public void initialize(){
+		if (delegateBean == null) {
+			delegateBean = lifecycleStrategy.createBean( beanType, fallbackProducer, beanContainer);
+		}
+		if (initializeDelegatedEagerly) {
+			delegateBean.initialize();
+		}
+	}
+
+	@Override
+	public B getBeanInstance() {
+		if ( delegateBean == null ) {
+			initialize();
+		}
+		return delegateBean.getBeanInstance();
+	}
+
+	@Override
+	public void release() {
+		if ( delegateBean != null ) {
+			delegateBean.release();
+		}
+		if (initializeDelegatedEagerly ) {
+			delegateBean = null;
+		}
+	}
+}
