@@ -44,4 +44,15 @@ public interface ManagedBeanRegistry extends Service {
 	 * May return {@code null}, indicating that no back-end container has been configured
 	 */
 	BeanContainer getBeanContainer();
+
+	/**
+	 * Get a bean reference that is safe to hold during boostrap.
+	 */
+	<T> ManagedBean<T> getBootstrapSafeBean(Class<T> beanClass);
+
+	/**
+	 * Named variant of {@link #getBootstrapSafeBean(Class)}
+	 */
+	<T> ManagedBean<? extends T> getBootstrapSafeBean(String beanName, Class<T> beanContract);
+
 }
